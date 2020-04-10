@@ -12,7 +12,7 @@ def parse_requirements(file):
 
 
 setup(
-    name='eeSAR',
+    name='eeSar',
     packages=find_packages(),
     include_package_data=True,
     version='0.0.1',
