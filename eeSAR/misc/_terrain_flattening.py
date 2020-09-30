@@ -4,12 +4,11 @@ import math
 # Volumetric model (Hoekman & Reiche 2015)
 def apply(image):
 
-
     geometry = image.geometry()
-    srtm = ee.Image('USGS/SRTMGL1_003').clip(geometry)
+    srtm = ee.Image('USGS/SRTMGL1_003').clip(geometry).resample()
 
     # convert Sigma0 dB to Power
-    sigma0_pow = ee.Image.constant(10).pow(image.divide(10.0))
+    # sigma0_pow = ee.Image.constant(10).pow(image.divide(10.0))
 
     # Article ( numbers relate to chapters)
     # 2.1.1 Radar geometry
@@ -17,7 +16,7 @@ def apply(image):
     phi_i = ee.Terrain.aspect(theta_i).reduceRegion(
         reducer=ee.Reducer.mean(),
         geometry=geometry,
-        scale=100
+        scale=1000
     ).get('aspect')
 
     # 2.1.2 Terrain geometry
@@ -46,9 +45,7 @@ def apply(image):
 
     # 2.2
     # Gamma_nought_flat
-    gamma0 = sigma0_pow.divide(theta_iRad.cos())
-    gamma0dB = ee.Image.constant(10).multiply(gamma0.log10())
-    ratio_1 = gamma0dB.select('VV').subtract(gamma0dB.select('VH'))
+    gamma0 = image.divide(theta_iRad.cos())
 
     # Volumetric Model
     nominator = (ninetyRad.subtract(theta_iRad).add(alpha_r)).tan()
@@ -57,7 +54,6 @@ def apply(image):
 
     # apply model
     gamma0_Volume = gamma0.divide(volModel)
-    gamma0_VolumeDB = ee.Image.constant(10).multiply(gamma0_Volume.log10())
 
     # we add a layover/shadow mask to the original implementation
     # layover, where slope > radar viewing angle
@@ -67,11 +63,7 @@ def apply(image):
     # shadow where LIA > 90
     shadow = theta_liaDeg.lt(85)
 
-    # calculate the ratio for RGB vis
-    ratio = gamma0_VolumeDB.select('VV').subtract(gamma0_VolumeDB.select('VH'))
-
-    output = gamma0_VolumeDB.addBands(ratio).addBands(alpha_r).addBands(phi_s).addBands(theta_iRad) \
-        .addBands(layover).addBands(shadow).addBands(gamma0dB).addBands(ratio_1)
+    output = gamma0_Volume.addBands(layover).addBands(shadow)
 
     # rename bands for output
     output = ee.Image(

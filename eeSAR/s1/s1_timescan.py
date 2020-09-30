@@ -29,7 +29,9 @@ def create(collection, region):
 
     """
     reduced = collection \
-        .select(['VV', 'VH', 'VVVH_ratio', 'VVVH_ND_ratio']) \
+        .select(['VV', 'VH' #,
+                 #'VVVH_ratio', 'VVVH_ND_ratio'
+                 ]) \
         .map(lambda image: image.addBands(
                 ee.Image(10).pow(image.select(['VV', 'VH']).divide(10)).rename(['VV_nat', 'VH_nat'])
             )
@@ -58,8 +60,8 @@ def create(collection, region):
         .select([
             'VV_min', 'VV_mean', 'VV_median', 'VV_max', 'VV_stdDev', 'VV_CV',
             'VH_min', 'VH_mean', 'VH_median', 'VH_max', 'VH_stdDev', 'VH_CV',
-            'VVVH_ratio_min', 'VVVH_ratio_mean', 'VVVH_ratio_median', 'VVVH_ratio_max', 'VVVH_ratio_stdDev',
-            'VVVH_ND_ratio_min', 'VVVH_ND_ratio_mean', 'VVVH_ND_ratio_median', 'VVVH_ND_ratio_max', 'VVVH_ND_ratio_stdDev',
+            #'VVVH_ratio_min', 'VVVH_ratio_mean', 'VVVH_ratio_median', 'VVVH_ratio_max', 'VVVH_ratio_stdDev',
+            #'VVVH_ND_ratio_min', 'VVVH_ND_ratio_mean', 'VVVH_ND_ratio_median', 'VVVH_ND_ratio_max', 'VVVH_ND_ratio_stdDev',
             'VV_median_VH_median', 'NDCV'
         ]) \
         .clip(region) \

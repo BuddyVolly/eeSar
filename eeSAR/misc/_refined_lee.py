@@ -6,7 +6,9 @@ import ee
 # https:#code.earthengine.google.com/2ef38463ebaf5ae133a478f173fd0ab5
 # The RL speckle filter
 def apply(image):
+
     def apply_to_band(band):
+
         # img must be in natural units, i.e. not in dB!
         # Set up 3x3 kernels
         weights3 = ee.List.repeat(ee.List.repeat(1, 3), 3)
